@@ -1,14 +1,13 @@
 # from django.db import models
-
-# Create your models here.
-
 from  django.contrib.auth.models import (
     AbstractBaseUser, BaseUserManager, PermissionsMixin
 )
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import RegexValidator
 
+# Create your models here.
 
 class UserManager(BaseUserManager):
     def create_user(
@@ -25,6 +24,10 @@ class UserManager(BaseUserManager):
         if not last_name:
             raise ValueError(_('Users must have a last name'))
 
+
+
+
+
         user = self.model(
             email=self.normalize_email(email),
             first_name=first_name,
@@ -35,6 +38,7 @@ class UserManager(BaseUserManager):
         if commit:
             user.save(using=self._db)
         return user
+
 
     def create_superuser(self, email, first_name, last_name, password):
         """
@@ -55,13 +59,15 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+
+    alphanumeric = RegexValidator(r'^[a-zA-Z]*$', 'Only characters are allowed.')
     email = models.EmailField(
         verbose_name=_('email address'), max_length=255, unique=True
     )
     # password field supplied by AbstractBaseUser
     # last_login field supplied by AbstractBaseUser
-    first_name = models.CharField(_('first name'), max_length=30, blank=True)
-    last_name = models.CharField(_('last name'), max_length=150, blank=True)
+    first_name = models.CharField(_('first name'), max_length=30, blank=True, validators=[alphanumeric])
+    last_name = models.CharField(_('last name'), max_length=150, blank=True, validators=[alphanumeric])
     phone = models.CharField(max_length=150, blank=True)
     is_active = models.BooleanField(
         _('active'),
